@@ -1,0 +1,6 @@
+---
+# defaults file for datadisk
+
+datadisk_name:        data
+datadisk_mount_path:  /data
+datadisk_lvm_disks:   ''

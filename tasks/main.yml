@@ -1,0 +1,31 @@
+---
+# tasks file for datadisk
+
+- name:   initialize datadisk
+  when:
+    -     (datadisk_name != None and datadisk_name != '')
+    -     (datadisk_lvm_disks != None and datadisk_lvm_disks != '')
+    -     (datadisk_mount_path != None and datadisk_mount_path != '')
+  become: true
+  become_method: sudo
+  vars:
+    vg_name:  vg{{datadisk_name}}
+    lv_name:  lv{{datadisk_name}}
+    dev_name: /dev/mapper/{{vg_name}}-{{lv_name}}
+  block:
+    - lvg:
+        vg:   '{{vg_name}}'
+        pvs:  '{{datadisk_lvm_disks}}'
+    - lvol:
+        vg:   '{{vg_name}}'
+        lv:   '{{lv_name}}'
+        size: '100%VG'
+    - filesystem:
+        fstype: xfs
+        dev:    '{{dev_name}}'
+    - mount:
+        path:   '{{datadisk_mount_path}}'
+        src:    '{{dev_name}}'
+        fstype: xfs
+        opts:   rw,nosuid,nodev,noexec,noatime,nodiratime,relatime,seclabel,attr2,inode64,noquota
+        state:  mounted
